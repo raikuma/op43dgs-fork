@@ -26,7 +26,8 @@ class Scene:
     gaussians : GaussianModel
 
     def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], 
-        fov_ratio=1 # for large fov exp
+        fov_ratio=1, # for large fov exp
+        camera_extent_scale=10
         ):
         """b
         :param path: Path to colmap scene main folder.
@@ -100,7 +101,7 @@ class Scene:
                                                            "iteration_" + str(self.loaded_iter),
                                                            "point_cloud.ply"))
         else:
-            self.cameras_extent = scene_info.nerf_normalization["radius"]
+            self.cameras_extent = scene_info.nerf_normalization["radius"] * camera_extent_scale
             init_point_cloud = scene_info.point_cloud
             # (r""" few-pcds """)
             # if args.max_pcds > 0:
