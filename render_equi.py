@@ -26,15 +26,18 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     gts_path = os.path.join(model_path, name, "ours_{}".format(iteration), "gt")
 
     makedirs(render_path, exist_ok=True)
-    # makedirs(gts_path, exist_ok=True)
+    makedirs(gts_path, exist_ok=True)
 
-    for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
-        view.image_width = 1920
-        view.image_height = 960
-        rendering = render(view, gaussians, pipeline, background)["render"]
-        # gt = view.original_image[0:3, :, :]
+    for idx, (viewpoint_image, viewpoint_cam) in enumerate(tqdm(views, desc="Rendering progress")):
+        if viewpoint_image is not None:
+            viewpoint_image = viewpoint_image.cuda()
+            gt = viewpoint_image[0:3, :, :]
+            torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
+        viewpoint_cam.image_width = 1920
+        viewpoint_cam.image_height = 960
+        viewpoint_cam = viewpoint_cam.cuda()
+        rendering = render(viewpoint_cam, gaussians, pipeline, background)["render"]
         torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
-        # torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
 
 def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train : bool, skip_test : bool, fov_ratio : float):
     with torch.no_grad():
@@ -46,15 +49,15 @@ def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParam
 
         if not skip_train:
             if fov_ratio != 1:
-                render_set(dataset.model_path, f"train_{fov_ratio}", scene.loaded_iter, scene.getTrainCameras(), gaussians, pipeline, background)
+                render_set(dataset.model_path, f"train_equi{fov_ratio}", scene.loaded_iter, scene.getTrainCameras(view_only=True), gaussians, pipeline, background)
             else:
-                render_set(dataset.model_path, "train", scene.loaded_iter, scene.getTrainCameras(), gaussians, pipeline, background)
+                render_set(dataset.model_path, "train_equi", scene.loaded_iter, scene.getTrainCameras(view_only=True), gaussians, pipeline, background)
 
         if not skip_test:
             if fov_ratio != 1:
-                render_set(dataset.model_path, f"test_equi_{fov_ratio}", scene.loaded_iter, scene.getTestCameras(), gaussians, pipeline, background)
+                render_set(dataset.model_path, f"test_equi_{fov_ratio}", scene.loaded_iter, scene.getTestCameras(view_only=True), gaussians, pipeline, background)
             else:
-                render_set(dataset.model_path, "test_equi", scene.loaded_iter, scene.getTestCameras(), gaussians, pipeline, background)
+                render_set(dataset.model_path, "test_equi", scene.loaded_iter, scene.getTestCameras(view_only=True), gaussians, pipeline, background)
 
 if __name__ == "__main__":
     # Set up command line argument parser

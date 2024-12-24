@@ -17,6 +17,7 @@ from scene.dataset_readers import sceneLoadTypeCallbacks
 from scene.gaussian_model import GaussianModel
 from arguments import ModelParams
 from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON
+from utils.data_utils import CameraDataset
 
 import numpy as np
 from scene.dataset_readers import SceneInfo
@@ -49,7 +50,7 @@ class Scene:
         print(f"""dataset path: {os.path.join(args.source_path, "transforms_train.json")}""")
 
         if os.path.exists(os.path.join(args.source_path, "sparse")):
-            scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, fov_ratio=fov_ratio)
+            scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, fov_ratio=fov_ratio, dataloader=args.dataloader)
         elif os.path.exists(os.path.join(args.source_path, "transforms_train.json")):
             print("Found transforms_train.json file, assuming Blender data set!")
             scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval)
@@ -123,8 +124,8 @@ class Scene:
         point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration))
         self.gaussians.save_ply(os.path.join(point_cloud_path, "point_cloud.ply"))
 
-    def getTrainCameras(self, scale=1.0):
-        return self.train_cameras[scale]
+    def getTrainCameras(self, scale=1.0, view_only=False):
+        return CameraDataset(self.train_cameras[scale], view_only=view_only)
 
-    def getTestCameras(self, scale=1.0):
-        return self.test_cameras[scale]
+    def getTestCameras(self, scale=1.0, view_only=False):
+        return CameraDataset(self.test_cameras[scale], view_only=True)
