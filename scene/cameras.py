@@ -33,6 +33,7 @@ class Camera(nn.Module):
         self.meta_only = meta_only
         self.resolution = resolution
         self.image_path = image_path
+        self.image = image
 
         try:
             self.data_device = torch.device(data_device)
