@@ -34,7 +34,8 @@ def readImages(renders_dir, gt_dir):
         gts.append(gt)
     # filter png
     gts = [g for g in gts if g.suffix == ".png"]
-    gts = sorted(gts)[1::2] # Test views
+    gts = sorted(gts, key=lambda x: int(os.path.basename(x).split('.')[0]))[1::2] # Test views
+    renders = sorted(renders)
     return renders, gts, image_names
 
 def evaluate(model_paths, source_path):
@@ -74,6 +75,8 @@ def evaluate(model_paths, source_path):
             alexs = []
 
             for idx in tqdm(range(len(renders)), desc="Metric evaluation progress"):
+                if idx >= 50: # front only
+                    break
                 render = tf.to_tensor(Image.open(renders[idx])).unsqueeze(0)[:, :3, :, :].cuda()
                 gt = tf.to_tensor(Image.open(gts[idx])).unsqueeze(0)[:, :3, :, :].cuda()
                 ssims.append(ssim(render, gt))

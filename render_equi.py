@@ -29,6 +29,8 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     makedirs(gts_path, exist_ok=True)
 
     for idx, (viewpoint_image, viewpoint_cam) in enumerate(tqdm(views, desc="Rendering progress")):
+        if idx >= 50: # front only
+            break
         if viewpoint_image is not None:
             viewpoint_image = viewpoint_image.cuda()
             gt = viewpoint_image[0:3, :, :]
