@@ -48,7 +48,9 @@ class Scene:
 
         print(f"""dataset path: {os.path.join(args.source_path, "transforms_train.json")}""")
 
-        if os.path.exists(os.path.join(args.source_path, "sparse")):
+        if os.path.exists(os.path.join(args.source_path, "openMVG")):
+            scene_info = sceneLoadTypeCallbacks["OmniMVG"](args.source_path, args.white_background, args.eval)
+        elif os.path.exists(os.path.join(args.source_path, "sparse")):
             scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, fov_ratio=fov_ratio)
         elif os.path.exists(os.path.join(args.source_path, "transforms_train.json")):
             print("Found transforms_train.json file, assuming Blender data set!")
