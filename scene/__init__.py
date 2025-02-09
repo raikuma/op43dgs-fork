@@ -27,7 +27,7 @@ class Scene:
 
     def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], 
         fov_ratio=1, # for large fov exp
-        camera_extent_scale=10
+        camera_extent_scale=1
         ):
         """b
         :param path: Path to colmap scene main folder.
