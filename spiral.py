@@ -47,7 +47,6 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
         x = np.sin(t * 2 * np.pi) * args.t_scale
         y = np.sin(2*t * 2 * np.pi) * args.t_scale
-        y = 0
         z = 0
 
         rx = -(y/args.t_scale) * np.pi * args.r_scale
@@ -74,7 +73,6 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
         w2c = np.linalg.inv(c2w)
         w2c[:3, 3] = w2c[:3, 3] + np.array([x, y, z])
-        # w2c[:3, :3] = w2c[:3, :3] @ R
 
         view.T = w2c[:3, 3]
         view.R = w2c[:3, :3]
