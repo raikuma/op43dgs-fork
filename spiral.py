@@ -40,17 +40,18 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     _T = np.array(view.T)
     _R = np.array(view.R)
 
-    vid = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'mp4v'), args.frame, (int(view.image_width), int(view.image_height)))
+    vid = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'mp4v'), 30, (int(view.image_width), int(view.image_height)))
 
     for i in range(args.frame):
         t = i / args.frame
 
-        x = np.cos(t * 2 * np.pi) * args.scale
-        y = np.sin(t * 2 * np.pi) * args.scale
+        x = np.sin(t * 2 * np.pi) * args.t_scale
+        y = np.sin(2*t * 2 * np.pi) * args.t_scale
+        y = 0
         z = 0
 
-        rx = -y * np.pi / 8
-        ry = x * np.pi / 8
+        rx = -(y/args.t_scale) * np.pi * args.r_scale
+        ry = (x/args.t_scale) * np.pi * args.r_scale
         rz = 0
 
         R = np.array([[np.cos(ry) * np.cos(rz), np.cos(ry) * np.sin(rz), -np.sin(ry)],
@@ -73,6 +74,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
         w2c = np.linalg.inv(c2w)
         w2c[:3, 3] = w2c[:3, 3] + np.array([x, y, z])
+        # w2c[:3, :3] = w2c[:3, :3] @ R
 
         view.T = w2c[:3, 3]
         view.R = w2c[:3, :3]
@@ -116,7 +118,8 @@ if __name__ == "__main__":
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--fov_ratio", default=1, type=float)
     parser.add_argument("--index", default=0, type=int)
-    parser.add_argument("--scale", default=0.1, type=float)
+    parser.add_argument("--t_scale", default=0.1, type=float)
+    parser.add_argument("--r_scale", default=0.0, type=float)
     parser.add_argument("--frame", default=90, type=int)
     parser.add_argument("--output", default="spiral.mp4", type=str)
     args = get_combined_args(parser)
